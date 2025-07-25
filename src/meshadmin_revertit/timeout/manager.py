@@ -13,6 +13,33 @@ from typing import Dict, List, Any, Optional, Set
 from queue import Queue, Empty
 
 
+class TimeoutEntry:
+    """Represents a single timeout entry."""
+    
+    def __init__(self, change_id: str, file_path: str, change_category: str,
+                 snapshot_id: Optional[str], event_type: str, timeout_seconds: int,
+                 start_time: datetime):
+        """Initialize timeout entry."""
+        self.change_id = change_id
+        self.file_path = file_path
+        self.change_category = change_category
+        self.snapshot_id = snapshot_id
+        self.event_type = event_type
+        self.timeout_seconds = timeout_seconds
+        self.start_time = start_time
+    
+    def is_expired(self, current_time: datetime) -> bool:
+        """Check if timeout has expired."""
+        expiry_time = self.start_time + timedelta(seconds=self.timeout_seconds)
+        return current_time >= expiry_time
+    
+    def get_remaining_time(self, current_time: datetime) -> timedelta:
+        """Get remaining time until timeout expiry."""
+        expiry_time = self.start_time + timedelta(seconds=self.timeout_seconds)
+        remaining = expiry_time - current_time
+        return remaining if remaining.total_seconds() > 0 else timedelta(0)
+
+
 class TimeoutManager:
     """Manages timeout confirmations for configuration changes."""
     
@@ -357,30 +384,3 @@ class TimeoutManager:
             self.active_timeouts.clear()
             self.logger.info(f"Cancelled all timeouts ({count} entries)")
             return count
-
-
-class TimeoutEntry:
-    """Represents a single timeout entry."""
-    
-    def __init__(self, change_id: str, file_path: str, change_category: str,
-                 snapshot_id: Optional[str], event_type: str, timeout_seconds: int,
-                 start_time: datetime):
-        """Initialize timeout entry."""
-        self.change_id = change_id
-        self.file_path = file_path
-        self.change_category = change_category
-        self.snapshot_id = snapshot_id
-        self.event_type = event_type
-        self.timeout_seconds = timeout_seconds
-        self.start_time = start_time
-    
-    def is_expired(self, current_time: datetime) -> bool:
-        """Check if timeout has expired."""
-        expiry_time = self.start_time + timedelta(seconds=self.timeout_seconds)
-        return current_time >= expiry_time
-    
-    def get_remaining_time(self, current_time: datetime) -> timedelta:
-        """Get remaining time until timeout expiry."""
-        expiry_time = self.start_time + timedelta(seconds=self.timeout_seconds)
-        remaining = expiry_time - current_time
-        return remaining if remaining.total_seconds() > 0 else timedelta(0)
