@@ -86,7 +86,7 @@ check_requirements() {
         case "$DISTRO_ID" in
             ubuntu|debian)
                 apt-get update
-                apt-get install -y python3-pip
+                apt-get install -y python3-pip python3-full
                 ;;
             centos|rhel|fedora)
                 if command -v dnf &> /dev/null; then
@@ -128,6 +128,7 @@ install_dependencies() {
             apt-get install -y \
                 python3-dev \
                 python3-pip \
+                python3-full \
                 python3-setuptools \
                 python3-wheel \
                 build-essential \
@@ -197,13 +198,23 @@ install_package() {
     
     # Install in development mode or from source
     if [[ -f setup.py ]]; then
-        pip3 install -e .
+        # Try to install normally first
+        if pip3 install -e . 2>/dev/null; then
+            print_success "Python package installed"
+        else
+            # If we get externally-managed-environment error, use --break-system-packages
+            print_warning "Externally managed environment detected, using --break-system-packages"
+            if pip3 install -e . --break-system-packages; then
+                print_success "Python package installed with --break-system-packages"
+            else
+                print_error "Failed to install Python package"
+                exit 1
+            fi
+        fi
     else
         print_error "setup.py not found in $PROJECT_DIR"
         exit 1
     fi
-    
-    print_success "Python package installed"
 }
 
 # Install configuration
