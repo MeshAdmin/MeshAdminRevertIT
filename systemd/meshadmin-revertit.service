@@ -1,0 +1,40 @@
+[Unit]
+Description=MeshAdminRevertIt Daemon
+Documentation=man:meshadmin-revertit(8)
+After=network.target local-fs.target
+Wants=network.target
+
+[Service]
+Type=forking
+User=root
+Group=root
+ExecStart=/usr/local/bin/meshadmin-daemon --config /etc/meshadmin-revertit/config.yaml
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStop=/bin/kill -TERM $MAINPID
+PIDFile=/var/run/meshadmin-revertit.pid
+TimeoutStartSec=30
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=5
+
+# Security hardening
+NoNewPrivileges=false
+ProtectSystem=false
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=false
+ProtectKernelTunables=false
+ProtectKernelModules=false
+ProtectControlGroups=false
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=meshadmin-revertit
+
+[Install]
+WantedBy=multi-user.target

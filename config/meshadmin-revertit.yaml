@@ -1,0 +1,120 @@
+# MeshAdminRevertIt Configuration
+# Default timeout confirmation settings for system configuration changes
+
+# Global settings
+global:
+  # Default timeout in seconds for configuration change confirmation
+  default_timeout: 300  # 5 minutes
+  
+  # Maximum timeout allowed
+  max_timeout: 1800  # 30 minutes
+  
+  # Minimum timeout allowed  
+  min_timeout: 60  # 1 minute
+  
+  # Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  log_level: INFO
+  
+  # Log file location
+  log_file: /var/log/meshadmin-revertit.log
+  
+  # PID file location
+  pid_file: /var/run/meshadmin-revertit.pid
+
+# Snapshot settings
+snapshot:
+  # Enable TimeShift integration
+  enable_timeshift: true
+  
+  # Snapshot storage location
+  snapshot_location: /var/lib/meshadmin-revertit/snapshots
+  
+  # Maximum number of snapshots to keep
+  max_snapshots: 10
+  
+  # Snapshot compression
+  compress_snapshots: true
+
+# Monitoring settings
+monitoring:
+  # Network configuration files to monitor
+  network_configs:
+    - /etc/network/interfaces
+    - /etc/netplan/*.yaml
+    - /etc/NetworkManager/system-connections/*
+    - /etc/systemd/network/*
+  
+  # SSH configuration files to monitor
+  ssh_configs:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/ssh_config.d/*
+  
+  # Firewall configuration files to monitor
+  firewall_configs:
+    - /etc/iptables/rules.v4
+    - /etc/iptables/rules.v6
+    - /etc/ufw/*
+    - /etc/firewalld/**/*
+  
+  # System service files to monitor
+  service_configs:
+    - /etc/systemd/system/*
+    - /etc/systemd/user/*
+  
+  # Additional custom paths to monitor
+  custom_paths: []
+
+# Timeout behavior settings
+timeout:
+  # Action to take on timeout (revert, alert, both)
+  timeout_action: revert
+  
+  # Enable connectivity check before revert
+  connectivity_check: true
+  
+  # Connectivity check endpoints
+  connectivity_endpoints:
+    - 8.8.8.8
+    - 1.1.1.1
+    - google.com
+  
+  # Connectivity check timeout
+  connectivity_timeout: 10
+  
+  # Grace period before revert (seconds)
+  revert_grace_period: 30
+
+# Notification settings
+notifications:
+  # Enable email notifications
+  email_enabled: false
+  email_smtp_server: localhost
+  email_smtp_port: 25
+  email_from: meshadmin-revertit@localhost
+  email_to: []
+  
+  # Enable syslog notifications
+  syslog_enabled: true
+  syslog_facility: local0
+  
+  # Enable desktop notifications (if GUI available)
+  desktop_enabled: true
+
+# Distro-specific settings
+distro:
+  # Auto-detect distribution
+  auto_detect: true
+  
+  # Override distribution detection
+  force_distro: null  # ubuntu, debian, centos, rhel, fedora, arch, etc.
+  
+  # Distro-specific command mappings
+  commands:
+    ubuntu:
+      network_restart: systemctl restart networking
+      ssh_restart: systemctl restart ssh
+      firewall_restart: ufw reload
+    debian:
+      network_restart: systemctl restart networking
+      ssh_restart: systemctl restart ssh
+      firewall_restart: ufw reload
