@@ -109,12 +109,11 @@ check_requirements() {
         print_success "systemd detected"
     fi
     
-    # Check TimeShift (optional)
+    # Check TimeShift
     if command -v timeshift &> /dev/null; then
         print_success "TimeShift found - enhanced snapshot capabilities available"
     else
-        print_warning "TimeShift not found - manual snapshots will be used"
-        print_status "To install TimeShift: apt install timeshift (Ubuntu/Debian)"
+        print_warning "TimeShift not found - will be installed with dependencies"
     fi
 }
 
@@ -133,7 +132,8 @@ install_dependencies() {
                 python3-wheel \
                 build-essential \
                 rsync \
-                inotify-tools
+                inotify-tools \
+                timeshift
             ;;
         centos|rhel|fedora)
             if command -v dnf &> /dev/null; then
@@ -145,6 +145,8 @@ install_dependencies() {
                     gcc \
                     rsync \
                     inotify-tools
+                # Note: TimeShift not readily available in default repos
+                print_warning "TimeShift not available in default repositories - manual snapshots will be used"
             else
                 yum install -y \
                     python3-devel \
@@ -154,6 +156,8 @@ install_dependencies() {
                     gcc \
                     rsync \
                     inotify-tools
+                # Note: TimeShift not readily available in default repos
+                print_warning "TimeShift not available in default repositories - manual snapshots will be used"
             fi
             ;;
         arch)
@@ -165,6 +169,8 @@ install_dependencies() {
                 base-devel \
                 rsync \
                 inotify-tools
+            # Note: TimeShift available in AUR - may require manual installation
+            print_warning "TimeShift available in AUR (yay -S timeshift) - manual snapshots will be used by default"
             ;;
         *)
             print_warning "Unknown distribution - you may need to install dependencies manually"
@@ -336,19 +342,8 @@ print_post_install() {
     echo "  Configuration: $CONFIG_DIR/config.yaml"
     echo "  Log file: /var/log/meshadmin-revertit.log"
     echo "  Data directory: $DATA_DIR"
+    echo "  TimeShift: Enhanced snapshot capabilities included"
     echo
-    if [[ ! -f /usr/bin/timeshift ]]; then
-        echo -e "${YELLOW}Optional:${NC} Install TimeShift for enhanced snapshot capabilities:"
-        case "$DISTRO_ID" in
-            ubuntu|debian)
-                echo "  apt install timeshift"
-                ;;
-            centos|rhel|fedora)
-                echo "  # TimeShift may need to be compiled from source"
-                ;;
-        esac
-        echo
-    fi
 }
 
 # Main installation function
