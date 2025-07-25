@@ -5,13 +5,12 @@ After=network.target local-fs.target
 Wants=network.target
 
 [Service]
-Type=forking
+Type=simple
 User=root
 Group=root
-ExecStart=/usr/local/bin/meshadmin-daemon --config /etc/meshadmin-revertit/config.yaml
+ExecStart=/usr/local/bin/meshadmin-daemon --config /etc/meshadmin-revertit/config.yaml --foreground
 ExecReload=/bin/kill -HUP $MAINPID
 ExecStop=/bin/kill -TERM $MAINPID
-PIDFile=/var/run/meshadmin-revertit.pid
 TimeoutStartSec=30
 TimeoutStopSec=30
 Restart=on-failure
