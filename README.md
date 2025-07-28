@@ -1,4 +1,4 @@
-🔄 MeshAdmin Revert-IT
+# 🔄 MeshAdmin Revert-IT
 
 > 🛡️ A timed confirmation system for (Li)nux configuration changes with automatic revert capabilities. Designed for remote system administrators to prevent loss of access due to configuration errors.
 
@@ -22,9 +22,9 @@ MeshAdmin Revert-IT monitors critical system configuration files and enforces ti
 
 ---
 
-## 🏗️ Architecture                                            
+## 🏗️ Architecture
 
-```mermaid                                            
+```mermaid
 graph TB
     A[Configuration Change] --> B[ConfigurationMonitor]
     B --> C[SnapshotManager]
@@ -412,7 +412,7 @@ MeshAdminRevertIt/
 
 ---
 
-## 🤝 Contributing    
+## 🤝 Contributing            
 
 1. 🍴 **Fork** the repository
 2. 🌿 **Create** a feature branch
@@ -423,7 +423,7 @@ MeshAdminRevertIt/
 
 ---
 
-## 📄 License    
+## 📄 License            
 
 📜 **MIT License** - see [LICENSE](LICENSE) file for details.
 
@@ -439,7 +439,7 @@ MeshAdminRevertIt/
 
 ---
 
-## 🙏 Acknowledgments      
+## 🙏 Acknowledgments              
 
 - 📸 **TimeShift project** for inspiration and integration
 - 🐧 **The Linux community** for excellent monitoring tools
