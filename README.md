@@ -342,7 +342,7 @@ MIT License - see LICENSE file for details.
 
 - **Issues**: GitHub Issues
 - **Documentation**: See `docs/` directory
-- **Security Issues**: Please report privately to security@meshadmin.com
+- **Security Issues**: Please report privately to info@meshadmin.com
 
 ## Acknowledgments
 
