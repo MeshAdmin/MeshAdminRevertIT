@@ -346,6 +346,7 @@ Level	Description
 
 **🚫 Service won't start**
 
+
 # 📊 Check service status and logs
 sudo systemctl status meshadmin-revertit
 sudo journalctl -u meshadmin-revertit -f
@@ -356,6 +357,7 @@ meshadmin-revertit test
 
 **📸 TimeShift not working**
 
+
 # 📦 Install TimeShift
 sudo apt install timeshift  # Ubuntu/Debian
 
@@ -364,6 +366,7 @@ sudo timeshift --list
 
 
 **🔐 Permissions errors**
+
 
 # 🔧 Ensure proper permissions
 sudo chown -R root:root /etc/meshadmin-revertit
@@ -464,9 +467,16 @@ Type	Contact
 ⸻
 
 
+<div align="center">
+
+
+
 **⭐ Star this project if you find it useful!**
 
 
 [![GitHub stars](https://img.shields.io/github/stars/meshadmin/meshadmin-revertit?style=social)](https://github.com/meshadmin/meshadmin-revertit/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/meshadmin/meshadmin-revertit?style=social)](https://github.com/meshadmin/meshadmin-revertit/network/members)
 [![GitHub issues](https://img.shields.io/github/issues/meshadmin/meshadmin-revertit)](https://github.com/meshadmin/meshadmin-revertit/issues)
+
+
+</div>        
