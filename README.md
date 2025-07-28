@@ -1,104 +1,149 @@
-# MeshAdmin Revert-IT
+🔄 MeshAdmin Revert-IT
 
-A timed confirmation system for (Li)nux configuration changes with automatic revert capabilities. Designed for remote system administrators to prevent loss of access due to configuration errors.
+> 🛡️ A timed confirmation system for (Li)nux configuration changes with automatic revert capabilities. Designed for remote system administrators to prevent loss of access due to configuration errors.
 
-## Overview
+
+⸻
+
+
+📋 Overview
 
 MeshAdmin Revert-IT monitors critical system configuration files and enforces timed confirmations for any changes. If changes are not confirmed within the specified timeout period, or if connectivity is lost, the system automatically reverts to the previous configuration using snapshots.
 
-### Key Features
 
-- **Automatic Configuration Monitoring** - Watches critical system files (network, SSH, firewall, services)
-- **Timed Confirmation System** - Requires explicit confirmation of changes within configurable timeouts
-- **Automatic Revert** - Reverts changes if not confirmed or if connectivity is lost
-- **TimeShift Integration** - Uses TimeShift for system-level snapshots when available
-- **Multi-Distribution Support** - Works with Ubuntu, Debian, CentOS, RHEL, Fedora, and more
-- **Connectivity Checking** - Tests network connectivity before performing reverts
-- **Flexible Configuration** - Customizable timeouts, paths, and behaviors per change type
+✨ Key Features
 
-## Architecture
+Feature	Description
+🔍 **Automatic Configuration Monitoring**	Watches critical system files (network, SSH, firewall, services)
+⏰ **Timed Confirmation System**	Requires explicit confirmation of changes within configurable timeouts
+🔄 **Automatic Revert**	Reverts changes if not confirmed or if connectivity is lost
+📸 **TimeShift Integration**	Uses TimeShift for system-level snapshots when available
+🐧 **Multi-Distribution Support**	Works with Ubuntu, Debian, CentOS, RHEL, Fedora, and more
+🌐 **Connectivity Checking**	Tests network connectivity before performing reverts
+⚙️ **Flexible Configuration**	Customizable timeouts, paths, and behaviors per change type
 
-### Core Components
+⸻
 
-1. **MeshAdminDaemon** (`meshadmin-daemon`) - Main service that monitors system changes
-2. **ConfigurationMonitor** - Watches critical system files using filesystem events
-3. **SnapshotManager** - Manages system snapshots (TimeShift integration + manual snapshots)
-4. **TimeoutManager** - Handles timed confirmations and automatic reverts
-5. **RevertEngine** - Performs automatic reversion of configuration changes
-6. **DistroDetector** - Detects Linux distribution and provides compatibility information
-7. **CLI Interface** (`meshadmin-revertit`) - Command-line tools for management
 
-### How It Works
+🏗️ Architecture
 
-1. **Monitoring Phase**: The daemon monitors critical configuration files for changes
-2. **Snapshot Creation**: When a change is detected, a snapshot is created before the change
-3. **Timeout Start**: A timeout is started requiring confirmation of the change
-4. **Connectivity Monitoring**: The system monitors network connectivity during the timeout
-5. **Confirmation or Revert**: 
-   - If confirmed in time: change is accepted and monitoring continues
-   - If timeout expires or connectivity is lost: automatic revert is performed
+graph TB
+    A[Configuration Change] --> B[ConfigurationMonitor]
+    B --> C[SnapshotManager]
+    C --> D[TimeoutManager]
+    D --> E{Confirmed?}
+    E -->|Yes| F[Accept Change]
+    E -->|No/Timeout| G[RevertEngine]
+    G --> H[Restore Snapshot]
+    
+    I[MeshAdminDaemon] --> B
+    I --> C
+    I --> D
+    I --> G
+    
+    J[CLI Interface] --> I
+    K[DistroDetector] --> I
 
-## Installation
 
-### Prerequisites
+🧩 Core Components
 
-- Linux system with systemd (Ubuntu 18.04+, Debian 10+, CentOS 7+, RHEL 7+, Fedora 28+)
-- Python 3.8 or higher
-- Root privileges for installation and operation
-- TimeShift (optional & recommended, for enhanced snapshot capabilities)
+Component	Purpose
+🔧 **MeshAdminDaemon**	Main service that monitors system changes
+👁️ **ConfigurationMonitor**	Watches critical system files using filesystem events
+📸 **SnapshotManager**	Manages system snapshots (TimeShift integration + manual snapshots)
+⏱️ **TimeoutManager**	Handles timed confirmations and automatic reverts
+🔄 **RevertEngine**	Performs automatic reversion of configuration changes
+🐧 **DistroDetector**	Detects Linux distribution and provides compatibility information
+💻 **CLI Interface**	Command-line tools for management
 
-### Quick Install
+🔄 How It Works
 
-```bash
-# Clone the repository
+sequenceDiagram
+    participant User
+    participant Monitor
+    participant Snapshot
+    participant Timeout
+    participant Revert
+    
+    User->>Monitor: Makes config change
+    Monitor->>Snapshot: Create snapshot
+    Snapshot->>Timeout: Start timeout timer
+    Timeout->>User: Show confirmation prompt
+    
+    alt User confirms in time
+        User->>Timeout: Confirm change
+        Timeout->>Monitor: Accept change
+    else Timeout expires or connectivity lost
+        Timeout->>Revert: Trigger revert
+        Revert->>Snapshot: Restore previous state
+    end
+
+
+⸻
+
+
+🚀 Installation
+
+📋 Prerequisites
+• 🐧 Linux system with systemd (Ubuntu 18.04+, Debian 10+, CentOS 7+, RHEL 7+, Fedora 28+)
+• 🐍 Python 3.8 or higher
+• 👑 Root privileges for installation and operation
+• 📸 TimeShift (optional & recommended, for enhanced snapshot capabilities)
+
+
+⚡ Quick Install
+
+# 📥 Clone the repository
 git clone https://github.com/meshadmin/meshadmin-revertit.git
 cd meshadmin-revertit
 
-# Run installation script
+# 🚀 Run installation script
 sudo ./scripts/install.sh
-```
 
-### Manual Installation
 
-```bash
-# Install system dependencies
+🔧 Manual Installation
+
+# 📦 Install system dependencies
 sudo apt update && sudo apt install python3-pip python3-dev build-essential rsync inotify-tools
 
-# Install Python package
+# 🐍 Install Python package
 sudo pip3 install -e .
 
-# Create directories
+# 📁 Create directories
 sudo mkdir -p /etc/meshadmin-revertit /var/lib/meshadmin-revertit
 
-# Copy configuration
+# ⚙️ Copy configuration
 sudo cp config/meshadmin-revertit.yaml /etc/meshadmin-revertit/config.yaml
 
-# Install systemd service
+# 🔧 Install systemd service
 sudo cp systemd/meshadmin-revertit.service /etc/systemd/system/
 sudo systemctl daemon-reload
-```
 
-## Configuration
 
-The main configuration file is located at `/etc/meshadmin-revertit/config.yaml`.
+⸻
 
-### Key Configuration Options
 
-```yaml
-# Global settings
+⚙️ Configuration
+
+> 📍 The main configuration file is located at `/etc/meshadmin-revertit/config.yaml`.
+
+
+🔑 Key Configuration Options
+
+# 🌐 Global settings
 global:
-  default_timeout: 300        # Default timeout (5 minutes)
-  max_timeout: 1800          # Maximum timeout (30 minutes)
+  default_timeout: 300        # ⏰ Default timeout (5 minutes)
+  max_timeout: 1800          # ⏰ Maximum timeout (30 minutes)
   log_level: INFO
   log_file: /var/log/meshadmin-revertit.log
 
-# Snapshot settings
+# 📸 Snapshot settings
 snapshot:
   enable_timeshift: true
   snapshot_location: /var/lib/meshadmin-revertit/snapshots
   max_snapshots: 10
 
-# Monitoring paths
+# 👁️ Monitoring paths
 monitoring:
   network_configs:
     - /etc/network/interfaces
@@ -113,7 +158,7 @@ monitoring:
     - /etc/iptables/rules.v4
     - /etc/ufw/*
 
-# Timeout behavior
+# ⏱️ Timeout behavior
 timeout:
   timeout_action: revert
   connectivity_check: true
@@ -121,234 +166,307 @@ timeout:
     - 8.8.8.8
     - 1.1.1.1
   revert_grace_period: 30
-```
 
-## Usage
 
-### Starting the Service
+⸻
 
-```bash
-# Enable and start the service
+
+💻 Usage
+
+🚀 Starting the Service
+
+# ✅ Enable and start the service
 sudo systemctl enable meshadmin-revertit
 sudo systemctl start meshadmin-revertit
 
-# Check status
+# 📊 Check status
 sudo systemctl status meshadmin-revertit
-```
 
-### Command Line Interface
 
-```bash
-# Show system status
+🖥️ Command Line Interface
+
+# 📊 Show system status
 meshadmin-revertit status
 
-# List active timeouts
+# ⏰ List active timeouts
 meshadmin-revertit timeouts
 
-# Confirm a configuration change
+# ✅ Confirm a configuration change
 meshadmin-revertit confirm <change-id>
 
-# Manage snapshots
+# 📸 Manage snapshots
 meshadmin-revertit snapshots list
 meshadmin-revertit snapshots create --description "Manual snapshot"
 meshadmin-revertit snapshots restore <snapshot-id>
 
-# Test system compatibility
+# 🧪 Test system compatibility
 meshadmin-revertit test
-```
 
-### Example Workflow
 
-1. **Make a configuration change** (e.g., edit `/etc/ssh/sshd_config`)
-2. **System detects change** and creates a snapshot
-3. **Timeout starts** (default 5 minutes for SSH changes)
-4. **System shows warning** about pending timeout
-5. **Confirm the change**: `meshadmin-revertit confirm ssh_1234567890`
-6. **Or let it auto-revert** if you lose connectivity or forget to confirm
+📝 Example Workflow
 
-### Change Categories and Timeouts
+flowchart LR
+    A[🔧 Make Config Change] --> B[🔍 System Detects Change]
+    B --> C[📸 Create Snapshot]
+    C --> D[⏰ Start Timeout]
+    D --> E[⚠️ Show Warning]
+    E --> F{User Action?}
+    F -->|✅ Confirm| G[✅ Accept Change]
+    F -->|⏰ Timeout/Lost Connection| H[🔄 Auto-Revert]
 
-- **Network changes** (`/etc/network/*`, `/etc/netplan/*`): 10 minutes
-- **SSH changes** (`/etc/ssh/*`): 15 minutes  
-- **Firewall changes** (`/etc/iptables/*`, `/etc/ufw/*`): 5 minutes
-- **Service changes** (`/etc/systemd/system/*`): 5 minutes
-- **Other system changes**: 5 minutes
+1. **🔧 Make a configuration change** (e.g., edit `/etc/ssh/sshd_config`)
+2. **🔍 System detects change** and creates a snapshot
+3. **⏰ Timeout starts** (default 5 minutes for SSH changes)
+4. **⚠️ System shows warning** about pending timeout
+5. **✅ Confirm the change**: `meshadmin-revertit confirm ssh_1234567890`
+6. **🔄 Or let it auto-revert** if you lose connectivity or forget to confirm
 
-## Safety Features
 
-### Connectivity Checking
+⏰ Change Categories and Timeouts
+
+Category	Files	Timeout
+🌐 **Network**	`/etc/network/*`, `/etc/netplan/*`	10 minutes
+🔐 **SSH**	`/etc/ssh/*`	15 minutes
+🛡️ **Firewall**	`/etc/iptables/*`, `/etc/ufw/*`	5 minutes
+🔧 **Services**	`/etc/systemd/system/*`	5 minutes
+📁 **Other**	Various system files	5 minutes
+
+⸻
+
+
+🛡️ Safety Features
+
+🌐 Connectivity Checking
+
 Before reverting network changes, the system tests connectivity to configured endpoints (8.8.8.8, 1.1.1.1, google.com by default).
 
-### Grace Period
+
+⏳ Grace Period
+
 A configurable grace period (default 30 seconds) is provided before performing reverts, allowing for last-minute confirmations.
 
-### Snapshot Management
-- Automatic cleanup of old snapshots
-- Integration with TimeShift for system-level snapshots
-- Manual snapshot creation and restoration
-- Compressed snapshots to save disk space
 
-### Default Configurations
+📸 Snapshot Management
+• 🧹 Automatic cleanup of old snapshots
+• 🔗 Integration with TimeShift for system-level snapshots
+• 🎯 Manual snapshot creation and restoration
+• 🗜️ Compressed snapshots to save disk space
+
+
+🔧 Default Configurations
+
 When snapshots are unavailable, the system can restore sensible default configurations for critical services.
 
-## Distribution Support
 
-### Full Support
-- **Ubuntu** 18.04, 20.04, 22.04, 24.04
-- **Debian** 10, 11, 12
-- **CentOS** 7, 8, 9
-- **RHEL** 7, 8, 9
-- **Fedora** 32+
+⸻
 
-### Experimental Support
-- **Arch Linux**
-- **openSUSE**
-- **Alpine Linux**
-- **Windows WSL**
-- **MacOS (Coming Soon!)**
-- **Windows OS (Planned)**
 
-### Distribution-Specific Features
-- Automatic detection of package managers (apt, yum, dnf, pacman)
-- Service management system detection (systemd, SysV)
-- Network configuration system detection (netplan, NetworkManager, interfaces)
-- Firewall system detection (ufw, firewalld, iptables)
+🐧 Distribution Support
 
-## Logging and Monitoring
+✅ Full Support
 
-### Log Files
-- Main log: `/var/log/meshadmin-revertit.log`
-- Automatic log rotation configured
-- Structured logging with timestamps and severity levels
+Distribution	Versions
+🟠 **Ubuntu**	18.04, 20.04, 22.04, 24.04
+🔴 **Debian**	10, 11, 12
+🟡 **CentOS**	7, 8, 9
+🔴 **RHEL**	7, 8, 9
+🔵 **Fedora**	32+
 
-### Log Levels
-- **DEBUG**: Detailed operation information
-- **INFO**: General operation status
-- **WARNING**: Timeout warnings and non-critical issues
-- **ERROR**: Errors during operation
-- **CRITICAL**: Critical failures requiring attention
+🧪 Experimental Support
+• 🔵 **Arch Linux**
+• 🟢 **openSUSE**
+• 🏔️ **Alpine Linux**
+• 🪟 **Windows WSL**
+• 🍎 **MacOS (Coming Soon!)**
+• 🪟 **Windows OS (Planned)**
 
-### Notifications
-- Syslog integration for system logs
-- Desktop notifications (when GUI available)
-- Email notifications (configurable)
 
-## Security Considerations
+🔧 Distribution-Specific Features
+• 📦 Automatic detection of package managers (apt, yum, dnf, pacman)
+• 🔧 Service management system detection (systemd, SysV)
+• 🌐 Network configuration system detection (netplan, NetworkManager, interfaces)
+• 🛡️ Firewall system detection (ufw, firewalld, iptables)
 
-### Permissions
-- Runs as root (required for system configuration management)
-- Configuration files are root-owned and protected
-- Snapshot directories have restricted permissions
 
-### Network Security
-- Minimal network exposure (only outbound connectivity checks)
-- No remote management interfaces by default
-- All operations are local to the system
+⸻
 
-### Snapshot Security
-- Snapshots may contain sensitive configuration data
-- Automatic cleanup prevents accumulation of old snapshots
-- Snapshots are stored in protected directories
 
-## Troubleshooting
+📊 Logging and Monitoring
 
-### Common Issues
+📝 Log Files
+• 📄 Main log: `/var/log/meshadmin-revertit.log`
+• 🔄 Automatic log rotation configured
+• 📋 Structured logging with timestamps and severity levels
 
-**Service won't start**
-```bash
-# Check service status and logs
+
+📊 Log Levels
+
+Level	Description
+🔍 **DEBUG**	Detailed operation information
+ℹ️ **INFO**	General operation status
+⚠️ **WARNING**	Timeout warnings and non-critical issues
+❌ **ERROR**	Errors during operation
+🚨 **CRITICAL**	Critical failures requiring attention
+
+📢 Notifications
+• 📋 Syslog integration for system logs
+• 🖥️ Desktop notifications (when GUI available)
+• 📧 Email notifications (configurable)
+
+
+⸻
+
+
+🔒 Security Considerations
+
+👑 Permissions
+• 🔐 Runs as root (required for system configuration management)
+• 📁 Configuration files are root-owned and protected
+• 🛡️ Snapshot directories have restricted permissions
+
+
+🌐 Network Security
+• 🔒 Minimal network exposure (only outbound connectivity checks)
+• 🚫 No remote management interfaces by default
+• 🏠 All operations are local to the system
+
+
+📸 Snapshot Security
+• ⚠️ Snapshots may contain sensitive configuration data
+• 🧹 Automatic cleanup prevents accumulation of old snapshots
+• 🔐 Snapshots are stored in protected directories
+
+
+⸻
+
+
+🔧 Troubleshooting
+
+❓ Common Issues
+
+**🚫 Service won't start**
+
+# 📊 Check service status and logs
 sudo systemctl status meshadmin-revertit
 sudo journalctl -u meshadmin-revertit -f
 
-# Test configuration
+# 🧪 Test configuration
 meshadmin-revertit test
-```
 
-**TimeShift not working**
-```bash
-# Install TimeShift
+
+**📸 TimeShift not working**
+
+# 📦 Install TimeShift
 sudo apt install timeshift  # Ubuntu/Debian
 
-# Configure TimeShift
+# ⚙️ Configure TimeShift
 sudo timeshift --list
-```
 
-**Permissions errors**
-```bash
-# Ensure proper permissions
+
+**🔐 Permissions errors**
+
+# 🔧 Ensure proper permissions
 sudo chown -R root:root /etc/meshadmin-revertit
 sudo chmod 644 /etc/meshadmin-revertit/config.yaml
-```
 
-### Debug Mode
-```bash
-# Run in foreground with debug logging
+
+🐛 Debug Mode
+
+# 🔍 Run in foreground with debug logging
 sudo meshadmin-daemon --config /etc/meshadmin-revertit/config.yaml --foreground
-```
 
-## Development
 
-### Requirements
-- Python 3.8+
-- pip packages: `psutil`, `watchdog`, `pyyaml`, `croniter`
+⸻
 
-### Development Setup
-```bash
-# Clone repository
+
+👨‍💻 Development
+
+📋 Requirements
+• 🐍 Python 3.8+
+• 📦 pip packages: `psutil`, `watchdog`, `pyyaml`, `croniter`
+
+
+🛠️ Development Setup
+
+# 📥 Clone repository
 git clone https://github.com/meshadmin/meshadmin-revertit.git
 cd meshadmin-revertit
 
-# Install in development mode
+# 🔧 Install in development mode
 pip3 install -e .
 
-# Run tests
+# 🧪 Run tests
 python -m pytest tests/
 
-# Run linting
+# 🔍 Run linting
 flake8 src/
 black src/
 mypy src/
-```
 
-### Project Structure
-```
+
+📁 Project Structure
+
 MeshAdminRevertIt/
-├── src/meshadmin_revertit/     # Main package code
-│   ├── daemon/                 # Daemon implementation
-│   ├── snapshot/               # Snapshot management
-│   ├── monitor/                # Configuration monitoring
-│   ├── timeout/                # Timeout management
-│   ├── revert/                 # Revert engine
-│   ├── distro/                 # Distribution detection
-│   └── cli/                    # Command-line interface
-├── config/                     # Default configuration
-├── systemd/                    # systemd service files
-├── scripts/                    # Installation scripts
-├── tests/                      # Test suite
-└── docs/                       # Documentation
-```
+├── 📦 src/meshadmin_revertit/     # Main package code
+│   ├── 🔧 daemon/                 # Daemon implementation
+│   ├── 📸 snapshot/               # Snapshot management
+│   ├── 👁️ monitor/                # Configuration monitoring
+│   ├── ⏰ timeout/                # Timeout management
+│   ├── 🔄 revert/                 # Revert engine
+│   ├── 🐧 distro/                 # Distribution detection
+│   └── 💻 cli/                    # Command-line interface
+├── ⚙️ config/                     # Default configuration
+├── 🔧 systemd/                    # systemd service files
+├── 📜 scripts/                    # Installation scripts
+├── 🧪 tests/                      # Test suite
+└── 📚 docs/                       # Documentation
 
-## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
+⸻
 
-## License
 
-MIT License - see LICENSE file for details.
+🤝 Contributing
+1. 🍴 Fork the repository
+2. 🌿 Create a feature branch
+3. ✏️ Make your changes
+4. 🧪 Add tests for new functionality
+5. ✅ Ensure all tests pass
+6. 📤 Submit a pull request
 
-## Support
 
-- **Issues**: GitHub Issues
-- **Documentation**: See `docs/` directory
-- **Security Issues**: Please report privately to info@meshadmin.com
+⸻
 
-## Acknowledgments
 
-- TimeShift project for inspiration and integration
-- The Linux community for excellent monitoring tools
-- All contributors and users providing feedback
+📄 License
+
+📜 MIT License - see LICENSE file for details.
+
+
+⸻
+
+
+🆘 Support
+
+Type	Contact
+🐛 **Issues**	GitHub Issues
+📚 **Documentation**	See `docs/` directory
+🔒 **Security Issues**	Please report privately to info@meshadmin.com
+
+⸻
+
+
+🙏 Acknowledgments
+• 📸 TimeShift project for inspiration and integration
+• 🐧 The Linux community for excellent monitoring tools
+• 👥 All contributors and users providing feedback
+
+
+⸻
+
+
+**⭐ Star this project if you find it useful!**
+
+
+[![GitHub stars](https://img.shields.io/github/stars/meshadmin/meshadmin-revertit?style=social)](https://github.com/meshadmin/meshadmin-revertit/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/meshadmin/meshadmin-revertit?style=social)](https://github.com/meshadmin/meshadmin-revertit/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/meshadmin/meshadmin-revertit)](https://github.com/meshadmin/meshadmin-revertit/issues)
