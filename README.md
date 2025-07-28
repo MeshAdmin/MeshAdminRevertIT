@@ -1,10 +1,10 @@
-# MeshAdminRevertIt
+# MeshAdmin Revert-IT
 
-A timed confirmation system for Linux configuration changes with automatic revert capabilities. Designed for remote system administrators to prevent loss of access due to configuration errors.
+A timed confirmation system for (Li)nux configuration changes with automatic revert capabilities. Designed for remote system administrators to prevent loss of access due to configuration errors.
 
 ## Overview
 
-MeshAdminRevertIt monitors critical system configuration files and enforces timed confirmations for any changes. If changes are not confirmed within the specified timeout period, or if connectivity is lost, the system automatically reverts to the previous configuration using snapshots.
+MeshAdmin Revert-IT monitors critical system configuration files and enforces timed confirmations for any changes. If changes are not confirmed within the specified timeout period, or if connectivity is lost, the system automatically reverts to the previous configuration using snapshots.
 
 ### Key Features
 
@@ -45,7 +45,7 @@ MeshAdminRevertIt monitors critical system configuration files and enforces time
 - Linux system with systemd (Ubuntu 18.04+, Debian 10+, CentOS 7+, RHEL 7+, Fedora 28+)
 - Python 3.8 or higher
 - Root privileges for installation and operation
-- TimeShift (optional, for enhanced snapshot capabilities)
+- TimeShift (optional & recommended, for enhanced snapshot capabilities)
 
 ### Quick Install
 
@@ -204,6 +204,9 @@ When snapshots are unavailable, the system can restore sensible default configur
 - **Arch Linux**
 - **openSUSE**
 - **Alpine Linux**
+- **Windows WSL**
+- **MacOS (Coming Soon!)**
+- **Windows OS (Planned)**
 
 ### Distribution-Specific Features
 - Automatic detection of package managers (apt, yum, dnf, pacman)
