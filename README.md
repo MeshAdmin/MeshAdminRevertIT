@@ -10,73 +10,88 @@ MeshAdmin Revert-IT monitors critical system configuration files and enforces ti
 
 ## ✨ Key Features
 
-| Feature | Description |
-|---------|-------------|
+| Feature                                  | Description                                                  |
+| ---------------------------------------- | ------------------------------------------------------------ |
 | 🔍 **Automatic Configuration Monitoring** | Watches critical system files (network, SSH, firewall, services) |
-| ⏰ **Timed Confirmation System** | Requires explicit confirmation of changes within configurable timeouts |
-| 🔄 **Automatic Revert** | Reverts changes if not confirmed or if connectivity is lost |
-| 📸 **TimeShift Integration** | Uses TimeShift for system-level snapshots when available |
-| 🐧 **Multi-Distribution Support** | Works with Ubuntu, Debian, CentOS, RHEL, Fedora, and more |
-| 🌐 **Connectivity Checking** | Tests network connectivity before performing reverts |
-| ⚙️ **Flexible Configuration** | Customizable timeouts, paths, and behaviors per change type |
+| ⏰ **Timed Confirmation System**          | Requires explicit confirmation of changes within configurable timeouts |
+| 🔄 **Automatic Revert**                   | Reverts changes if not confirmed or if connectivity is lost  |
+| 📸 **TimeShift Integration**              | Uses TimeShift for system-level snapshots when available     |
+| 🐧 **Multi-Distribution Support**         | Works with Ubuntu, Debian, CentOS, RHEL, Fedora, and more    |
+| 🌐 **Connectivity Checking**              | Tests network connectivity before performing reverts         |
+| ⚙️ **Flexible Configuration**             | Customizable timeouts, paths, and behaviors per change type  |
 
 ---
 
 ## 🏗️ Architecture
 
-```mermaid
-graph TB
-    A[Configuration Change] --> B[ConfigurationMonitor]
-    B --> C[SnapshotManager]
-    C --> D[TimeoutManager]
-    D --> E{Confirmed?}
-    E -->|Yes| F[Accept Change]
-    E -->|No/Timeout| G[RevertEngine]
-    G --> H[Restore Snapshot]
-    
-    I[MeshAdminDaemon] --> B
-    I --> C
-    I --> D
-    I --> G
-    
-    J[CLI Interface] --> I
-    K[DistroDetector] --> I
+```
+                     ┌─────────────────┐
+                     │ Configuration   │
+                     │    Change       │
+                     └────────┬────────┘
+                              │
+                              ▼
+                   ┌──────────────────────┐
+                   │ ConfigurationMonitor │
+                   └──────────┬───────────┘
+                              │
+                              ▼
+                    ┌─────────────────────┐
+                    │  SnapshotManager    │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │  TimeoutManager     │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                          ┌─────────┐
+                          │Confirmed│
+                          │    ?    │
+                          └────┬────┘
+                         Yes ┌─┴─┐ No
+                          ┌──┘   └──┐
+                          ▼         ▼
+                  ┌──────────┐  ┌──────────┐
+                  │  Accept  │  │  Revert  │
+                  │  Change  │  │  Engine  │
+                  └──────────┘  └─────┬────┘
+                                      │
+                                      ▼
+                              ┌──────────────┐
+                              │   Restore    │
+                              │   Snapshot   │
+                              └──────────────┘
 ```
 
 ## 🧩 Core Components
 
-| Component | Purpose |
-|-----------|---------|
-| 🔧 **MeshAdminDaemon** | Main service that monitors system changes |
-| 👁️ **ConfigurationMonitor** | Watches critical system files using filesystem events |
-| 📸 **SnapshotManager** | Manages system snapshots (TimeShift integration + manual snapshots) |
-| ⏱️ **TimeoutManager** | Handles timed confirmations and automatic reverts |
-| 🔄 **RevertEngine** | Performs automatic reversion of configuration changes |
-| 🐧 **DistroDetector** | Detects Linux distribution and provides compatibility information |
-| 💻 **CLI Interface** | Command-line tools for management |
+| Component                  | Purpose                                                      |
+| -------------------------- | ------------------------------------------------------------ |
+| 🔧 **MeshAdminDaemon**      | Main service that monitors system changes                    |
+| 👁️ **ConfigurationMonitor** | Watches critical system files using filesystem events        |
+| 📸 **SnapshotManager**      | Manages system snapshots (TimeShift integration + manual snapshots) |
+| ⏱️ **TimeoutManager**       | Handles timed confirmations and automatic reverts            |
+| 🔄 **RevertEngine**         | Performs automatic reversion of configuration changes        |
+| 🐧 **DistroDetector**       | Detects Linux distribution and provides compatibility information |
+| 💻 **CLI Interface**        | Command-line tools for management                            |
 
 ## 🔄 How It Works
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Monitor
-    participant Snapshot
-    participant Timeout
-    participant Revert
-    
-    User->>Monitor: Makes config change
-    Monitor->>Snapshot: Create snapshot
-    Snapshot->>Timeout: Start timeout timer
-    Timeout->>User: Show confirmation prompt
-    
-    alt User confirms in time
-        User->>Timeout: Confirm change
-        Timeout->>Monitor: Accept change
-    else Timeout expires or connectivity lost
-        Timeout->>Revert: Trigger revert
-        Revert->>Snapshot: Restore previous state
-    end
+```
+1. User makes config change
+   └─> Monitor detects change
+       └─> Create snapshot
+           └─> Start timeout timer
+               └─> Show confirmation prompt
+                   │
+                   ├─> [User confirms in time]
+                   │   └─> Accept change
+                   │
+                   └─> [Timeout expires/Connection lost]
+                       └─> Trigger revert
+                           └─> Restore previous state
 ```
 
 ---
@@ -84,6 +99,7 @@ sequenceDiagram
 ## 🚀 Installation
 
 ### 📋 Prerequisites
+
 - 🐧 Linux system with systemd (Ubuntu 18.04+, Debian 10+, CentOS 7+, RHEL 7+, Fedora 28+)
 - 🐍 Python 3.8 or higher
 - 👑 Root privileges for installation and operation
@@ -204,15 +220,25 @@ meshadmin-revertit test
 
 ### 📝 Example Workflow
 
-```mermaid
-flowchart LR
-    A[🔧 Make Config Change] --> B[🔍 System Detects Change]
-    B --> C[📸 Create Snapshot]
-    C --> D[⏰ Start Timeout]
-    D --> E[⚠️ Show Warning]
-    E --> F{User Action?}
-    F -->|✅ Confirm| G[✅ Accept Change]
-    F -->|⏰ Timeout/Lost Connection| H[🔄 Auto-Revert]
+```
+┌────────────────┐     ┌───────────────────┐     ┌─────────────────┐
+│ 🔧 Make Config │ ──> │ 🔍 System Detects │ ──> │ 📸 Create      │
+│    Change      │     │    Change         │     │    Snapshot     │
+└────────────────┘     └───────────────────┘     └────────┬────────┘
+                                                           │
+                                                           ▼
+┌────────────────┐     ┌───────────────────┐     ┌─────────────────┐
+│ ✅ Accept      │ <── │   User Action?    │ <── │ ⏰ Start        │
+│    Change      │     │                   │     │    Timeout      │
+└────────────────┘     └─────────┬─────────┘     └────────┬────────┘
+                                 │                         │
+                                 │ Timeout/Lost           ▼
+                                 │ Connection      ┌─────────────────┐
+                                 │                 │ ⚠️ Show Warning │
+                                 ▼                 └─────────────────┘
+                         ┌────────────────┐
+                         │ 🔄 Auto-Revert │
+                         └────────────────┘
 ```
 
 1. **🔧 Make a configuration change** (e.g., edit `/etc/ssh/sshd_config`)
@@ -224,31 +250,35 @@ flowchart LR
 
 ### ⏰ Change Categories and Timeouts
 
-| Category | Files | Timeout |
-|----------|-------|---------|
-| 🌐 **Network** | `/etc/network/*`, `/etc/netplan/*` | 10 minutes |
-| 🔐 **SSH** | `/etc/ssh/*` | 15 minutes |
-| 🛡️ **Firewall** | `/etc/iptables/*`, `/etc/ufw/*` | 5 minutes |
-| 🔧 **Services** | `/etc/systemd/system/*` | 5 minutes |
-| 📁 **Other** | Various system files | 5 minutes |
+| Category       | Files                              | Timeout    |
+| -------------- | ---------------------------------- | ---------- |
+| 🌐 **Network**  | `/etc/network/*`, `/etc/netplan/*` | 10 minutes |
+| 🔐 **SSH**      | `/etc/ssh/*`                       | 15 minutes |
+| 🛡️ **Firewall** | `/etc/iptables/*`, `/etc/ufw/*`    | 5 minutes  |
+| 🔧 **Services** | `/etc/systemd/system/*`            | 5 minutes  |
+| 📁 **Other**    | Various system files               | 5 minutes  |
 
 ---
 
 ## 🛡️ Safety Features
 
 ### 🌐 Connectivity Checking
+
 Before reverting network changes, the system tests connectivity to configured endpoints (8.8.8.8, 1.1.1.1, google.com by default).
 
 ### ⏳ Grace Period
+
 A configurable grace period (default 30 seconds) is provided before performing reverts, allowing for last-minute confirmations.
 
 ### 📸 Snapshot Management
+
 - 🧹 **Automatic cleanup** of old snapshots
 - 🔗 **Integration with TimeShift** for system-level snapshots
 - 🎯 **Manual snapshot creation** and restoration
 - 🗜️ **Compressed snapshots** to save disk space
 
 ### 🔧 Default Configurations
+
 When snapshots are unavailable, the system can restore sensible default configurations for critical services.
 
 ---
@@ -257,15 +287,16 @@ When snapshots are unavailable, the system can restore sensible default configur
 
 ### ✅ Full Support
 
-| Distribution | Versions |
-|--------------|----------|
+| Distribution | Versions                   |
+| ------------ | -------------------------- |
 | 🟠 **Ubuntu** | 18.04, 20.04, 22.04, 24.04 |
-| 🔴 **Debian** | 10, 11, 12 |
-| 🟡 **CentOS** | 7, 8, 9 |
-| 🔴 **RHEL** | 7, 8, 9 |
-| 🔵 **Fedora** | 32+ |
+| 🔴 **Debian** | 10, 11, 12                 |
+| 🟡 **CentOS** | 7, 8, 9                    |
+| 🔴 **RHEL**   | 7, 8, 9                    |
+| 🔵 **Fedora** | 32+                        |
 
 ### 🧪 Experimental Support
+
 - 🔵 Arch Linux
 - 🟢 openSUSE
 - 🏔️ Alpine Linux
@@ -274,6 +305,7 @@ When snapshots are unavailable, the system can restore sensible default configur
 - 🪟 Windows OS (Planned)
 
 ### 🔧 Distribution-Specific Features
+
 - 📦 **Automatic detection** of package managers (apt, yum, dnf, pacman)
 - 🔧 **Service management** system detection (systemd, SysV)
 - 🌐 **Network configuration** system detection (netplan, NetworkManager, interfaces)
@@ -284,21 +316,23 @@ When snapshots are unavailable, the system can restore sensible default configur
 ## 📊 Logging and Monitoring
 
 ### 📝 Log Files
+
 - 📄 **Main log**: `/var/log/meshadmin-revertit.log`
 - 🔄 **Automatic log rotation** configured
 - 📋 **Structured logging** with timestamps and severity levels
 
 ### 📊 Log Levels
 
-| Level | Description |
-|-------|-------------|
-| 🔍 **DEBUG** | Detailed operation information |
-| ℹ️ **INFO** | General operation status |
-| ⚠️ **WARNING** | Timeout warnings and non-critical issues |
-| ❌ **ERROR** | Errors during operation |
-| 🚨 **CRITICAL** | Critical failures requiring attention |
+| Level          | Description                              |
+| -------------- | ---------------------------------------- |
+| 🔍 **DEBUG**    | Detailed operation information           |
+| ℹ️ **INFO**     | General operation status                 |
+| ⚠️ **WARNING**  | Timeout warnings and non-critical issues |
+| ❌ **ERROR**    | Errors during operation                  |
+| 🚨 **CRITICAL** | Critical failures requiring attention    |
 
 ### 📢 Notifications
+
 - 📋 **Syslog integration** for system logs
 - 🖥️ **Desktop notifications** (when GUI available)
 - 📧 **Email notifications** (configurable)
@@ -308,16 +342,19 @@ When snapshots are unavailable, the system can restore sensible default configur
 ## 🔒 Security Considerations
 
 ### 👑 Permissions
+
 - 🔐 **Runs as root** (required for system configuration management)
 - 📁 **Configuration files** are root-owned and protected
 - 🛡️ **Snapshot directories** have restricted permissions
 
 ### 🌐 Network Security
+
 - 🔒 **Minimal network exposure** (only outbound connectivity checks)
 - 🚫 **No remote management** interfaces by default
 - 🏠 **All operations** are local to the system
 
 ### 📸 Snapshot Security
+
 - ⚠️ **Snapshots may contain** sensitive configuration data
 - 🧹 **Automatic cleanup** prevents accumulation of old snapshots
 - 🔐 **Snapshots are stored** in protected directories
@@ -369,6 +406,7 @@ sudo meshadmin-daemon --config /etc/meshadmin-revertit/config.yaml --foreground
 ## 👨‍💻 Development
 
 ### 📋 Requirements
+
 - 🐍 Python 3.8+
 - 📦 pip packages: `psutil`, `watchdog`, `pyyaml`, `croniter`
 
@@ -412,7 +450,7 @@ MeshAdminRevertIt/
 
 ---
 
-## 🤝 Contributing            
+## 🤝 Contributing      
 
 1. 🍴 **Fork** the repository
 2. 🌿 **Create** a feature branch
@@ -423,7 +461,7 @@ MeshAdminRevertIt/
 
 ---
 
-## 📄 License            
+## 📄 License      
 
 📜 **MIT License** - see [LICENSE](LICENSE) file for details.
 
@@ -431,15 +469,15 @@ MeshAdminRevertIt/
 
 ## 🆘 Support
 
-| Type | Contact |
-|------|---------|
-| 🐛 **Issues** | [GitHub Issues](https://github.com/meshadmin/meshadmin-revertit/issues) |
-| 📚 **Documentation** | See [docs/](docs/) directory |
-| 🔒 **Security Issues** | Please report privately to info@meshadmin.com |
+| Type                  | Contact                                                      |
+| --------------------- | ------------------------------------------------------------ |
+| 🐛 **Issues**          | [GitHub Issues](https://github.com/meshadmin/meshadmin-revertit/issues) |
+| 📚 **Documentation**   | See [docs/](docs/) directory                                 |
+| 🔒 **Security Issues** | Please report privately to info@meshadmin.com                |
 
 ---
 
-## 🙏 Acknowledgments              
+## 🙏 Acknowledgments        
 
 - 📸 **TimeShift project** for inspiration and integration
 - 🐧 **The Linux community** for excellent monitoring tools
